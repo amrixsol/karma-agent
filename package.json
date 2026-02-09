@@ -1,0 +1,29 @@
+{
+  "name": "karma-agent",
+  "version": "1.0.0",
+  "description": "Credit cards for AI agents on Solana — powered by Karma",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "demo": "npx tsx src/agent.ts",
+    "example:balance": "npx tsx examples/check-balance.ts",
+    "example:create-card": "npx tsx examples/create-card.ts",
+    "example:spend": "npx tsx examples/spend-check.ts"
+  },
+  "keywords": [
+    "solana",
+    "usdc",
+    "ai-agent",
+    "credit-card",
+    "payments",
+    "karma"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.2.2",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}
