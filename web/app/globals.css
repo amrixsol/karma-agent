@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-karma-purple: #852EEF;
+  --color-karma-pink: #C157FD;
+  --color-karma-green: #1BA27A;
+  --color-karma-red: #EA4335;
+  --color-karma-surface: #1B1B1C;
+  --color-karma-bg: #0E0E0F;
+  --color-karma-card: #161617;
+  --color-karma-border: #2a2a2b;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-karma-bg);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-karma-purple);
+  color: white;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
