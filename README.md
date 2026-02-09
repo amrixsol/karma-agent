@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/karma-icon-white.svg" width="120" alt="Karma" />
+  <img src="assets/karma-logo.png" width="120" alt="Karma" />
 </p>
 
 <h1 align="center">Karma Agent Cards</h1>
