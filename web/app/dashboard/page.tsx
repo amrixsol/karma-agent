@@ -374,7 +374,7 @@ function Dashboard({ card, agentKey }: { card: CardInfo; agentKey: string }) {
       <div className="bg-gradient-to-br from-karma-purple/20 to-karma-pink/10 border border-karma-purple/20 rounded-2xl p-6">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <p className="text-xs text-white/40 mb-1">Virtual Visa</p>
+            <p className="text-xs text-white/40 mb-1">Virtual Card</p>
             <p className="text-lg font-semibold">{card.name}</p>
           </div>
           <img src="/karma-logo.png" alt="Karma" className="h-8 w-auto opacity-60" />

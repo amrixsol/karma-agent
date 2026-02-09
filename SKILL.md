@@ -6,7 +6,7 @@ Base URL: `https://agents.karmapay.xyz`
 
 ## What is this?
 
-Karma lets you create virtual Visa cards funded by USDC on Solana. Each card gets its own deposit address. Send USDC, agent spends with the card. Withdraw anytime.
+Karma lets you create virtual credit cards funded by USDC on Solana. Each card gets its own deposit address. Send USDC, agent spends with the card. Withdraw anytime.
 
 ## Quick Start
 
@@ -17,13 +17,12 @@ curl -X POST https://agents.karmapay.xyz/api/register \
   -d '{"email":"you@example.com"}'
 # Returns: { account_id, secret_key: "sk_live_..." }
 
-# 2. Complete KYC (one-time, human step)
-# Ask the human for their real details — this is required by the card issuer.
+# 2. Complete KYC (one-time, human step — no PII needed)
 curl -X POST https://agents.karmapay.xyz/api/kyc \
-  -H "Authorization: Bearer sk_live_..." \
-  -H "Content-Type: application/json" \
-  -d '{"firstName":"John","lastName":"Doe","email":"you@example.com","birthDate":"1990-01-01","nationalId":"123456789","countryOfIssue":"US","phoneCountryCode":"1","phoneNumber":"5551234567","address":{"line1":"123 Main St","city":"San Francisco","region":"CA","postalCode":"94102","countryCode":"US"},"ipAddress":"1.2.3.4"}'
-# Returns: { status, kyc_url } — human must open kyc_url in browser to verify identity
+  -H "Authorization: Bearer sk_live_..."
+# Returns: { status: "pending_verification", kyc_url: "https://in.sumsub.com/..." }
+# Human opens kyc_url in browser to verify identity (ID + selfie on Sumsub's secure site).
+# Agent polls GET /api/kyc/status until status is "approved".
 
 # 3. Create a card for your agent
 curl -X POST https://agents.karmapay.xyz/api/cards \

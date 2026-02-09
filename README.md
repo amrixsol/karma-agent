@@ -22,20 +22,20 @@ AI agents can transfer crypto, but they can't buy things in the real world. They
 
 ## The Solution
 
-Karma gives every AI agent its own virtual Visa card funded by USDC on Solana.
+Karma gives every AI agent its own virtual credit card funded by USDC on Solana.
 
 - **Isolated by design** — each card has its own Solana deposit address, spending limits, and API key
 - **Agent gets a scoped key** (`sk_agent_`) — can only check balance, verify spending, and retrieve card details
 - **Owner keeps control** (`sk_live_`) — set per-transaction, daily, and monthly limits. Freeze or revoke instantly
 - **Funded by USDC** — send USDC to the card's deposit address from any Solana wallet. Balance updates in seconds
-- **Real Visa card** — works anywhere Visa is accepted, online and in-person
+- **Real credit card** — works anywhere cards are accepted, online and in-person
 
 ## How It Works
 
 ```
-┌─────────────┐     USDC      ┌─────────────────┐     Visa      ┌──────────────┐
+┌─────────────┐     USDC      ┌─────────────────┐    Payment    ┌──────────────┐
 │   Solana     │──────────────▸│   Karma Card     │─────────────▸│  Merchant    │
-│   Wallet     │               │   (Virtual Visa)  │              │  (Any store) │
+│   Wallet     │               │  (Virtual Card)   │              │  (Any store) │
 └─────────────┘               └─────────────────┘               └──────────────┘
                                        │
                                        │ sk_agent_ key
@@ -72,7 +72,7 @@ npx tsx src/agent.ts
 The agent will:
 1. **Register** — creates your account, gives you an owner key
 2. **KYC** — collects identity details, submits to verification, shows you a link to complete in your browser, then polls until approved
-3. **Create card** — sets up a virtual Visa with your spending limits, gives the agent its scoped API key
+3. **Create card** — sets up a virtual card with your spending limits, gives the agent its scoped API key
 4. **Wait for funding** — shows your Solana deposit address, polls until USDC arrives
 5. **Operational mode** — check balance, verify spend amounts, retrieve card PAN/CVV, view transactions
 
@@ -169,10 +169,10 @@ Karma API (agents.karmapay.xyz)
   └── Transactions: returns settlement history
   │
   ▼
-Virtual Visa Card (issued by card network partner)
+Virtual Card (issued by card network partner)
   │
   ▼
-Visa Network → Merchant
+Card Network → Merchant
 ```
 
 Each card maps to a **dedicated Solana wallet** (the deposit address). The on-chain USDC balance *is* the card balance — no separate ledger, no custodial pool. What you see on-chain is what the card can spend.

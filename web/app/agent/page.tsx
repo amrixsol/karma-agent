@@ -12,12 +12,12 @@ curl -X POST https://agents.karmapay.xyz/api/register \\
   -d '{"email":"you@example.com"}'
 # → { account_id, secret_key: "sk_live_..." }
 
-# 2. Complete KYC (one-time)
+# 2. Complete KYC (one-time, no PII needed)
 curl -X POST https://agents.karmapay.xyz/api/kyc \\
-  -H "Authorization: Bearer sk_live_..." \\
-  -H "Content-Type: application/json" \\
-  -d '{"firstName":"...","lastName":"...","email":"...","birthDate":"1990-01-01","nationalId":"...","countryOfIssue":"US","address":{"line1":"...","city":"...","region":"...","postalCode":"...","countryCode":"US"},"ipAddress":"0.0.0.0"}'
-# → { status, kyc_url } — open kyc_url in browser
+  -H "Authorization: Bearer sk_live_..."
+# → { status: "pending_verification", kyc_url }
+# Human opens kyc_url → verifies on Sumsub (ID + selfie)
+# Agent polls: GET /api/kyc/status until "approved"
 
 # 3. Create a card
 curl -X POST https://agents.karmapay.xyz/api/cards \\

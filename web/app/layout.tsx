@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Karma — AI Credit Cards",
   description:
-    "Credit cards for AI agents, backed by USDC on Solana. Fund with crypto, spend anywhere Visa is accepted.",
+    "Credit cards for AI agents, backed by USDC on Solana. Fund with crypto, spend anywhere.",
 };
 
 export default function RootLayout({

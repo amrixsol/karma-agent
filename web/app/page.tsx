@@ -35,7 +35,7 @@ export default function Home() {
         transition={{ duration: 0.6, delay: 0.2 }}
         className="text-lg text-white/50 text-center mb-12 max-w-md"
       >
-        Virtual Visa cards for AI agents, backed by USDC on Solana.
+        Credit cards for AI agents, backed by USDC on Solana.
         Fund with crypto, spend anywhere.
       </motion.p>
 

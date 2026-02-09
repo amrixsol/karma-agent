@@ -6,7 +6,7 @@
  * Walks through the full lifecycle:
  *   1. Register an account
  *   2. Submit KYC (human completes verification link)
- *   3. Create a virtual Visa card with spending limits
+ *   3. Create a virtual card with spending limits
  *   4. Show deposit address for USDC funding
  *   5. Enter operational mode: balance, spend checks, card details
  *
@@ -153,39 +153,15 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
     return await pollKycStatus(state);
   }
 
-  log("We need some details for identity verification.\n");
+  log("Starting identity verification...\n");
+  log("No personal details needed here — you'll verify directly on a secure page.\n");
 
-  const firstName = await ask("First name: ");
-  const lastName = await ask("Last name: ");
-  const email = state.email || (await ask("Email: "));
-  const birthDate = await ask("Date of birth (YYYY-MM-DD): ");
-  const nationalId = await ask("National ID / SSN: ");
-  const countryOfIssue = await ask("Country of issue (e.g. US): ");
-  log("\nAddress:");
-  const line1 = await ask("  Street address: ");
-  const city = await ask("  City: ");
-  const region = await ask("  State/Region: ");
-  const postalCode = await ask("  Postal code: ");
-  const countryCode = await ask("  Country code (e.g. US): ");
-
-  log("\nSubmitting KYC...");
   const res = await api<{
     status: string;
-    rain_user_id: string;
     kyc_url: string | null;
   }>("/api/kyc", {
     method: "POST",
     apiKey: state.owner_key,
-    body: {
-      firstName,
-      lastName,
-      email,
-      birthDate,
-      nationalId,
-      countryOfIssue,
-      address: { line1, city, region, postalCode, countryCode },
-      ipAddress: "0.0.0.0",
-    },
   });
 
   state.kyc_status = res.status;
@@ -198,8 +174,7 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
   }
 
   if (res.kyc_url) {
-    log(`\nKYC requires manual verification.`);
-    log(`\nOpen this link in your browser to complete verification:`);
+    log(`Open this link in your browser to verify your identity (ID + selfie):`);
     log(`\n  ${res.kyc_url}\n`);
   }
 
