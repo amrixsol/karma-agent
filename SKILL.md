@@ -18,11 +18,12 @@ curl -X POST https://agents.karmapay.xyz/api/register \
 # Returns: { account_id, secret_key: "sk_live_..." }
 
 # 2. Complete KYC (one-time, human step)
+# Ask the human for their real details — this is required by the card issuer.
 curl -X POST https://agents.karmapay.xyz/api/kyc \
   -H "Authorization: Bearer sk_live_..." \
   -H "Content-Type: application/json" \
-  -d '{"firstName":"John","lastName":"Doe","email":"you@example.com","birthDate":"1990-01-01","nationalId":"123456789","countryOfIssue":"US","address":{"line1":"123 Main St","city":"SF","region":"CA","postalCode":"94102","countryCode":"US"},"ipAddress":"1.2.3.4"}'
-# Returns: { status, kyc_url } — open kyc_url in browser if not auto-approved
+  -d '{"firstName":"John","lastName":"Doe","email":"you@example.com","birthDate":"1990-01-01","nationalId":"123456789","countryOfIssue":"US","phoneCountryCode":"1","phoneNumber":"5551234567","address":{"line1":"123 Main St","city":"San Francisco","region":"CA","postalCode":"94102","countryCode":"US"},"ipAddress":"1.2.3.4"}'
+# Returns: { status, kyc_url } — human must open kyc_url in browser to verify identity
 
 # 3. Create a card for your agent
 curl -X POST https://agents.karmapay.xyz/api/cards \
