@@ -109,13 +109,17 @@ function StepIndicator({ current }: { current: Step }) {
       {steps.map((s, i) => (
         <div key={s.key} className="flex items-center gap-2">
           <div
-            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
-              i <= currentIdx
-                ? "bg-karma-purple text-white"
-                : "bg-white/5 text-white/30"
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
+              i < currentIdx
+                ? "bg-karma-green text-white"
+                : i === currentIdx
+                ? "bg-karma-purple text-white shadow-[0_0_12px_rgba(133,46,239,0.4)]"
+                : "bg-white/[0.04] text-white/25 border border-white/[0.06]"
             }`}
           >
-            {i < currentIdx ? "✓" : i + 1}
+            {i < currentIdx ? (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>
+            ) : i + 1}
           </div>
           <span
             className={`text-xs hidden sm:inline ${
@@ -126,8 +130,8 @@ function StepIndicator({ current }: { current: Step }) {
           </span>
           {i < steps.length - 1 && (
             <div
-              className={`w-6 h-px ${
-                i < currentIdx ? "bg-karma-purple" : "bg-white/10"
+              className={`w-8 h-px transition-colors duration-300 ${
+                i < currentIdx ? "bg-karma-green/50" : "bg-white/[0.06]"
               }`}
             />
           )}
@@ -371,27 +375,29 @@ function Dashboard({ card, agentKey }: { card: CardInfo; agentKey: string }) {
   return (
     <div className="space-y-6">
       {/* Card visual */}
-      <div className="bg-gradient-to-br from-karma-purple/20 to-karma-pink/10 border border-karma-purple/20 rounded-2xl p-6">
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <p className="text-xs text-white/40 mb-1">Virtual Visa</p>
-            <p className="text-lg font-semibold">{card.name}</p>
+      <div className="relative rounded-2xl bg-gradient-to-br from-karma-purple via-karma-pink/80 to-karma-purple/60 p-[1px]">
+        <div className="rounded-2xl bg-gradient-to-br from-[#1a0a2e] via-[#1e1030] to-[#12081d] p-6 card-shine">
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <p className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Virtual Visa</p>
+              <p className="text-lg font-semibold">{card.name}</p>
+            </div>
+            <img src="/karma-logo.png" alt="Karma" className="w-8 h-8 opacity-60" />
           </div>
-          <img src="/karma-logo.png" alt="Karma" className="w-8 h-8 opacity-60" />
-        </div>
-        <p className="font-mono text-xl tracking-widest mb-4">•••• •••• •••• {card.last4}</p>
-        <div className="flex gap-6 text-xs text-white/40">
-          <div>
-            <p>Per txn</p>
-            <p className="text-white font-medium">${card.limits.per_txn}</p>
-          </div>
-          <div>
-            <p>Daily</p>
-            <p className="text-white font-medium">${card.limits.daily}</p>
-          </div>
-          <div>
-            <p>Monthly</p>
-            <p className="text-white font-medium">${card.limits.monthly}</p>
+          <p className="font-mono text-xl tracking-[0.2em] text-white/80 mb-4">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {card.last4}</p>
+          <div className="flex gap-6 text-xs text-white/40">
+            <div>
+              <p className="text-[9px] uppercase tracking-wider">Per txn</p>
+              <p className="text-white font-medium mt-0.5">${card.limits.per_txn}</p>
+            </div>
+            <div>
+              <p className="text-[9px] uppercase tracking-wider">Daily</p>
+              <p className="text-white font-medium mt-0.5">${card.limits.daily}</p>
+            </div>
+            <div>
+              <p className="text-[9px] uppercase tracking-wider">Monthly</p>
+              <p className="text-white font-medium mt-0.5">${card.limits.monthly}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -482,14 +488,15 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen px-6 py-12 max-w-2xl mx-auto">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <Link href="/" className="text-sm text-white/30 hover:text-white/60 transition-colors">
-          ← Back
+    <div className="min-h-screen px-6 py-12 max-w-2xl mx-auto bg-grid relative">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-karma-purple/5 blur-[160px] pointer-events-none" />
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 relative">
+        <Link href="/" className="text-xs text-white/25 hover:text-white/50 transition-colors">
+          &larr; Back
         </Link>
         <div className="flex items-center gap-4 mt-6 mb-6">
           <img src="/karma-logo.png" alt="Karma" className="w-10 h-10" />
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         </div>
       </motion.div>
 
