@@ -16,7 +16,7 @@ export default function Home() {
         transition={{ duration: 0.6 }}
         className="mb-8"
       >
-        <img src="/karma-logo.png" alt="Karma" className="w-20 h-20" />
+        <img src="/karma-logo.png" alt="Karma" className="h-20 w-auto" />
       </motion.div>
 
       {/* Title */}

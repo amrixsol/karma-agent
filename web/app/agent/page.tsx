@@ -68,7 +68,7 @@ export default function AgentPage() {
         </Link>
 
         <div className="flex items-center gap-4 mt-6 mb-4">
-          <img src="/karma-logo.png" alt="Karma" className="w-10 h-10" />
+          <img src="/karma-logo.png" alt="Karma" className="h-10 w-auto" />
           <h1 className="text-3xl font-bold">Agent Setup</h1>
         </div>
         <p className="text-white/50">

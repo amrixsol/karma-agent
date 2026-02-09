@@ -377,7 +377,7 @@ function Dashboard({ card, agentKey }: { card: CardInfo; agentKey: string }) {
             <p className="text-xs text-white/40 mb-1">Virtual Visa</p>
             <p className="text-lg font-semibold">{card.name}</p>
           </div>
-          <img src="/karma-logo.png" alt="Karma" className="w-8 h-8 opacity-60" />
+          <img src="/karma-logo.png" alt="Karma" className="h-8 w-auto opacity-60" />
         </div>
         <p className="font-mono text-xl tracking-widest mb-4">•••• •••• •••• {card.last4}</p>
         <div className="flex gap-6 text-xs text-white/40">
@@ -488,7 +488,7 @@ export default function DashboardPage() {
           ← Back
         </Link>
         <div className="flex items-center gap-4 mt-6 mb-6">
-          <img src="/karma-logo.png" alt="Karma" className="w-10 h-10" />
+          <img src="/karma-logo.png" alt="Karma" className="h-10 w-auto" />
           <h1 className="text-3xl font-bold">Dashboard</h1>
         </div>
       </motion.div>
