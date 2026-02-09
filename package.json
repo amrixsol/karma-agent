@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "demo": "npx tsx src/agent.ts",
+    "start": "npx tsx src/agent.ts",
     "example:balance": "npx tsx examples/check-balance.ts",
     "example:create-card": "npx tsx examples/create-card.ts",
     "example:spend": "npx tsx examples/spend-check.ts"

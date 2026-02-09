@@ -58,52 +58,49 @@ Karma gives every AI agent its own virtual Visa card funded by USDC on Solana.
 
 ## Quick Start
 
-### Install
+### Run the interactive agent
+
+The fastest way to get started. Walks you through the entire setup and enters operational mode:
 
 ```bash
-npm install karma-agent
+git clone https://github.com/amrixsol/karma-agent.git
+cd karma-agent
+npm install
+npx tsx src/agent.ts
 ```
 
-### As an Owner — Create a Card
+The agent will:
+1. **Register** — creates your account, gives you an owner key
+2. **KYC** — collects identity details, submits to verification, shows you a link to complete in your browser, then polls until approved
+3. **Create card** — sets up a virtual Visa with your spending limits, gives the agent its scoped API key
+4. **Wait for funding** — shows your Solana deposit address, polls until USDC arrives
+5. **Operational mode** — check balance, verify spend amounts, retrieve card PAN/CVV, view transactions
+
+State is saved to `~/.karma-agent.json` so you can stop and resume at any step.
+
+### Use as a TypeScript SDK
 
 ```typescript
-import { KarmaOwner } from "karma-agent";
+import { KarmaOwner, KarmaAgent } from "karma-agent";
 
-// Register (one-time)
+// Owner: register + create a card
 const { secret_key } = await KarmaOwner.register("you@example.com");
-
 const owner = new KarmaOwner(secret_key);
-
-// Create a card with limits
 const card = await owner.createCard({
   name: "Shopping Agent",
   per_txn_limit: 100,
   daily_limit: 500,
-  monthly_limit: 2000,
 });
+// → card.deposit_address (send USDC here)
+// → card.agent_api_key (give to your agent)
 
-console.log(`Deposit address: ${card.deposit_address}`);
-console.log(`Agent key: ${card.agent_api_key}`);
-// Send USDC to the deposit address, then give the agent key to your AI
-```
-
-### As an Agent — Spend
-
-```typescript
-import { KarmaAgent } from "karma-agent";
-
-const agent = new KarmaAgent("sk_agent_...");
-
-// Check balance
+// Agent: check balance and spend
+const agent = new KarmaAgent(card.agent_api_key);
 const balance = await agent.getBalance();
-console.log(`Available: $${balance.available}`);
-
-// Can I afford this?
 const check = await agent.canSpend(49.99);
 if (check.allowed) {
-  // Get card details for checkout
-  const card = await agent.getCardDetails();
-  // Use card.number, card.cvv, card.expiry_month, card.expiry_year
+  const details = await agent.getCardDetails();
+  // Use details.number, details.cvv, details.expiry_month, details.expiry_year
 }
 ```
 
