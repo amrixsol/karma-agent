@@ -76,7 +76,7 @@ export default function AgentPage() {
         </p>
       </motion.div>
 
-      {/* Option 1: One-liner */}
+      {/* Skill URL */}
       <motion.section
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -84,11 +84,11 @@ export default function AgentPage() {
         className="glass rounded-2xl p-6 mb-6"
       >
         <h2 className="text-lg font-semibold mb-3">
-          Option 1: Give your agent this command
+          Read the skill file
         </h2>
         <p className="text-sm text-white/40 mb-4">
-          Any AI agent that can read a URL can use this. Just add it to your
-          agent&apos;s instructions or system prompt:
+          Everything you need — registration, KYC, card creation, and spending
+          endpoints — is in one file:
         </p>
         <div className="bg-black/40 rounded-xl p-4 font-mono text-sm text-karma-green mb-3 overflow-x-auto">
           curl -s {SKILL_URL}
@@ -96,59 +96,11 @@ export default function AgentPage() {
         <CopyButton text={`curl -s ${SKILL_URL}`} label="Copy command" />
       </motion.section>
 
-      {/* Option 2: MCP / System prompt */}
-      <motion.section
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="glass rounded-2xl p-6 mb-6"
-      >
-        <h2 className="text-lg font-semibold mb-3">
-          Option 2: Add to system prompt
-        </h2>
-        <p className="text-sm text-white/40 mb-4">
-          For Claude, ChatGPT, or any LLM — paste this into the system
-          instructions:
-        </p>
-        <div className="bg-black/40 rounded-xl p-4 font-mono text-sm text-white/70 mb-3 overflow-x-auto whitespace-pre-wrap">
-          {`You have access to a Karma credit card. Read the API docs at:\n${SKILL_URL}\n\nYour API key is: sk_agent_...\nUse it to check balance, verify purchases, and get card details for checkout.`}
-        </div>
-        <CopyButton
-          text={`You have access to a Karma credit card. Read the API docs at:\n${SKILL_URL}\n\nYour API key is: sk_agent_...\nUse it to check balance, verify purchases, and get card details for checkout.`}
-          label="Copy prompt"
-        />
-      </motion.section>
-
-      {/* Option 3: Interactive CLI */}
-      <motion.section
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="glass rounded-2xl p-6 mb-6"
-      >
-        <h2 className="text-lg font-semibold mb-3">
-          Option 3: Run the interactive agent
-        </h2>
-        <p className="text-sm text-white/40 mb-4">
-          A CLI that walks through the entire setup: register, KYC, card
-          creation, funding, then enters operational mode.
-        </p>
-        <div className="bg-black/40 rounded-xl p-4 font-mono text-sm text-karma-green mb-3 overflow-x-auto">
-          git clone https://github.com/amrixsol/karma-agent.git{"\n"}
-          cd karma-agent && npm install{"\n"}
-          npx tsx src/agent.ts
-        </div>
-        <CopyButton
-          text="git clone https://github.com/amrixsol/karma-agent.git && cd karma-agent && npm install && npx tsx src/agent.ts"
-          label="Copy commands"
-        />
-      </motion.section>
-
       {/* Quick reference */}
       <motion.section
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.2 }}
         className="glass rounded-2xl p-6 mb-6"
       >
         <h2 className="text-lg font-semibold mb-3">Quick API Reference</h2>
@@ -170,7 +122,7 @@ export default function AgentPage() {
       <motion.section
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
+        transition={{ delay: 0.3 }}
         className="glass rounded-2xl p-6 mb-6"
       >
         <h2 className="text-lg font-semibold mb-3">Security Model</h2>
