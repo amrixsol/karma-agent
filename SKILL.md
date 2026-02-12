@@ -1,6 +1,6 @@
-# Karma Agent Cards
+# Karma Card: Agentic Credit Cards
 
-> Give your AI agent a credit card on Solana.
+> Programmable credit card infrastructure for AI agents, built on Solana.
 
 Base URL: `https://agents.karmapay.xyz`
 

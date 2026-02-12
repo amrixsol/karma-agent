@@ -1,7 +1,7 @@
 {
   "name": "karma-agent",
   "version": "1.0.0",
-  "description": "Credit cards for AI agents on Solana — powered by Karma",
+  "description": "Karma Card: Programmable credit card infrastructure for AI agents, built on Solana",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
