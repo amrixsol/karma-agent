@@ -154,14 +154,41 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
   }
 
   log("Starting identity verification...\n");
-  log("No personal details needed here — you'll verify directly on a secure page.\n");
+  log("We need a few details to set up your account. You'll complete the final\n");
+  log("verification (ID + selfie) on a secure page afterward.\n");
 
+  const firstName = await ask("First name: ");
+  const lastName = await ask("Last name: ");
+  const email = state.email || (await ask("Email: "));
+  const birthDate = await ask("Date of birth (YYYY-MM-DD): ");
+  const nationalId = await ask("National ID / SSN (last 4 OK): ");
+  const phoneCountryCode = await ask("Phone country code (digits only, e.g. 1 for US): ");
+  const phoneNumber = await ask("Phone number: ");
+  log("\nAddress:");
+  const line1 = await ask("  Street address: ");
+  const city = await ask("  City: ");
+  const region = await ask("  State/Region: ");
+  const postalCode = await ask("  Postal code: ");
+  const countryCode = await ask("  Country code (e.g. US): ");
+
+  log("\nSubmitting KYC...");
   const res = await api<{
     status: string;
     kyc_url: string | null;
   }>("/api/kyc", {
     method: "POST",
     apiKey: state.owner_key,
+    body: {
+      firstName,
+      lastName,
+      email,
+      birthDate,
+      nationalId,
+      phoneCountryCode,
+      phoneNumber,
+      address: { line1, city, region, postalCode, countryCode },
+      ipAddress: "0.0.0.0",
+    },
   });
 
   state.kyc_status = res.status;
@@ -450,7 +477,7 @@ async function main() {
  | . \\ (_| | |  | | | | | | (_| |
  |_|\\_\\__,_|_|  |_| |_| |_|\\__,_|
 
-  Credit Cards for AI Agents
+  Karma Card: Agentic Credit Cards
   Powered by USDC on Solana
 `);
 

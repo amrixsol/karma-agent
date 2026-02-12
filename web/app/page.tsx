@@ -26,7 +26,7 @@ export default function Home() {
         transition={{ duration: 0.6, delay: 0.1 }}
         className="text-4xl md:text-5xl font-bold text-center mb-4 tracking-tight"
       >
-        AI Credit Cards
+        Agentic Credit Cards
       </motion.h1>
 
       <motion.p
@@ -35,8 +35,8 @@ export default function Home() {
         transition={{ duration: 0.6, delay: 0.2 }}
         className="text-lg text-white/50 text-center mb-12 max-w-md"
       >
-        Credit cards for AI agents, backed by USDC on Solana.
-        Fund with crypto, spend anywhere.
+        Programmable credit card infrastructure for AI agents, built on Solana.
+        Fund with USDC, spend anywhere.
       </motion.p>
 
       {/* Two paths */}

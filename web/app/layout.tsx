@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Karma — AI Credit Cards",
+  title: "Karma Card — Agentic Credit Cards",
   description:
-    "Credit cards for AI agents, backed by USDC on Solana. Fund with crypto, spend anywhere.",
+    "Programmable credit card infrastructure for AI agents, built on Solana. Fund with USDC, spend anywhere.",
 };
 
 export default function RootLayout({

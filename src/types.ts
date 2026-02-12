@@ -16,6 +16,8 @@ export interface KycRequest {
   birthDate: string;
   nationalId: string;
   countryOfIssue?: string;
+  phoneCountryCode: string;
+  phoneNumber: string;
   address: {
     line1: string;
     city: string;
