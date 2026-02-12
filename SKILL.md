@@ -26,7 +26,8 @@ curl -X POST https://agents.karmapay.xyz/api/kyc \
     "lastName": "Doe",
     "email": "jane@example.com",
     "birthDate": "1990-01-15",
-    "nationalId": "1234",
+    "nationalId": "123456789",
+    "countryOfIssue": "US",
     "phoneCountryCode": "1",
     "phoneNumber": "5551234567",
     "address": {

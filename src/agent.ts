@@ -161,7 +161,8 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
   const lastName = await ask("Last name: ");
   const email = state.email || (await ask("Email: "));
   const birthDate = await ask("Date of birth (YYYY-MM-DD): ");
-  const nationalId = await ask("National ID / SSN (last 4 OK): ");
+  const countryOfIssue = await ask("Country of issue (e.g. US): ");
+  const nationalId = await ask("National ID / SSN (9 digits for US): ");
   const phoneCountryCode = await ask("Phone country code (digits only, e.g. 1 for US): ");
   const phoneNumber = await ask("Phone number: ");
   log("\nAddress:");
@@ -184,6 +185,7 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
       email,
       birthDate,
       nationalId,
+      countryOfIssue,
       phoneCountryCode,
       phoneNumber,
       address: { line1, city, region, postalCode, countryCode },
