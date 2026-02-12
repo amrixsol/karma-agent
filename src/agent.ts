@@ -19,6 +19,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as readline from "node:readline";
+import { exec } from "node:child_process";
 
 const BASE_URL = "https://agents.karmapay.xyz";
 const STATE_FILE = path.join(
@@ -78,6 +79,63 @@ function header(title: string): void {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function openUrl(url: string): void {
+  const platform = process.platform;
+  const cmd =
+    platform === "darwin" ? "open" : platform === "win32" ? "start" : "xdg-open";
+  exec(`${cmd} "${url}"`);
+}
+
+interface Country {
+  code: string;
+  phone: string;
+  name: string;
+}
+
+const COUNTRIES: Country[] = [
+  { code: "US", phone: "1", name: "United States" },
+  { code: "GB", phone: "44", name: "United Kingdom" },
+  { code: "AE", phone: "971", name: "United Arab Emirates" },
+  { code: "SA", phone: "966", name: "Saudi Arabia" },
+  { code: "IN", phone: "91", name: "India" },
+  { code: "DE", phone: "49", name: "Germany" },
+  { code: "FR", phone: "33", name: "France" },
+  { code: "CA", phone: "1", name: "Canada" },
+  { code: "AU", phone: "61", name: "Australia" },
+  { code: "SG", phone: "65", name: "Singapore" },
+  { code: "JP", phone: "81", name: "Japan" },
+  { code: "BR", phone: "55", name: "Brazil" },
+  { code: "NG", phone: "234", name: "Nigeria" },
+  { code: "KE", phone: "254", name: "Kenya" },
+  { code: "ZA", phone: "27", name: "South Africa" },
+  { code: "MX", phone: "52", name: "Mexico" },
+  { code: "PH", phone: "63", name: "Philippines" },
+  { code: "TR", phone: "90", name: "Turkey" },
+  { code: "PK", phone: "92", name: "Pakistan" },
+  { code: "EG", phone: "20", name: "Egypt" },
+];
+
+async function pickCountry(prompt: string): Promise<Country> {
+  log(prompt);
+  for (let i = 0; i < COUNTRIES.length; i++) {
+    log(`  [${i + 1}] ${COUNTRIES[i].name} (${COUNTRIES[i].code})`);
+  }
+  log(`  [0] Other — enter manually`);
+
+  const choice = await ask("\n> ");
+  const idx = Number(choice) - 1;
+
+  if (idx >= 0 && idx < COUNTRIES.length) {
+    return COUNTRIES[idx];
+  }
+
+  // Manual entry
+  const code = await ask("Country code (e.g. AE, US, GB): ");
+  const phone = await ask("Phone country code (digits only, e.g. 971): ");
+  const name = await ask("Country name: ");
+  return { code: code.toUpperCase(), phone, name };
 }
 
 async function api<T>(
@@ -161,16 +219,22 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
   const lastName = await ask("Last name: ");
   const email = state.email || (await ask("Email: "));
   const birthDate = await ask("Date of birth (YYYY-MM-DD): ");
-  const countryOfIssue = await ask("Country of issue (e.g. US): ");
-  const nationalId = await ask("National ID / SSN (9 digits for US): ");
-  const phoneCountryCode = await ask("Phone country code (digits only, e.g. 1 for US): ");
-  const phoneNumber = await ask("Phone number: ");
+
+  const country = await pickCountry("\nSelect your country:");
+  log(`\n  Selected: ${country.name} (${country.code})\n`);
+
+  const nationalId = await ask(
+    country.code === "US"
+      ? "SSN (9 digits): "
+      : `National ID (${country.name}): `,
+  );
+  const phoneNumber = await ask(`Phone number (without +${country.phone} prefix): `);
+
   log("\nAddress:");
   const line1 = await ask("  Street address: ");
   const city = await ask("  City: ");
   const region = await ask("  State/Region: ");
   const postalCode = await ask("  Postal code: ");
-  const countryCode = await ask("  Country code (e.g. US): ");
 
   log("\nSubmitting KYC...");
   const res = await api<{
@@ -185,10 +249,16 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
       email,
       birthDate,
       nationalId,
-      countryOfIssue,
-      phoneCountryCode,
+      countryOfIssue: country.code,
+      phoneCountryCode: country.phone,
       phoneNumber,
-      address: { line1, city, region, postalCode, countryCode },
+      address: {
+        line1,
+        city,
+        region,
+        postalCode,
+        countryCode: country.code,
+      },
       ipAddress: "0.0.0.0",
     },
   });
@@ -203,8 +273,10 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
   }
 
   if (res.kyc_url) {
-    log(`Open this link in your browser to verify your identity (ID + selfie):`);
-    log(`\n  ${res.kyc_url}\n`);
+    log(`\nOpening verification link in your browser...`);
+    log(`  ${res.kyc_url}\n`);
+    openUrl(res.kyc_url);
+    log(`Complete the identity verification (ID + selfie) in your browser.`);
   }
 
   return await pollKycStatus(state);
@@ -214,7 +286,9 @@ async function pollKycStatus(state: AgentState): Promise<AgentState> {
   log("Waiting for KYC approval...");
 
   if (state.kyc_url) {
-    log(`\nVerification link: ${state.kyc_url}\n`);
+    log(`\nVerification link: ${state.kyc_url}`);
+    log(`(Opening in browser...)\n`);
+    openUrl(state.kyc_url);
   }
 
   while (true) {

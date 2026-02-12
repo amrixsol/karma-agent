@@ -195,7 +195,8 @@ function RegisterStep({
 function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () => void }) {
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", birthDate: "", nationalId: "",
-    countryOfIssue: "US", line1: "", city: "", region: "", postalCode: "", countryCode: "US",
+    countryOfIssue: "US", phoneCountryCode: "1", phoneNumber: "",
+    line1: "", city: "", region: "", postalCode: "", countryCode: "US",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -215,6 +216,8 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
           firstName: form.firstName, lastName: form.lastName, email: form.email,
           birthDate: form.birthDate, nationalId: form.nationalId,
           countryOfIssue: form.countryOfIssue,
+          phoneCountryCode: form.phoneCountryCode,
+          phoneNumber: form.phoneNumber,
           address: {
             line1: form.line1, city: form.city, region: form.region,
             postalCode: form.postalCode, countryCode: form.countryCode,
@@ -278,7 +281,13 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
         <Input label="Date of birth" value={form.birthDate} onChange={set("birthDate")} placeholder="YYYY-MM-DD" />
         <Input label="National ID / SSN" value={form.nationalId} onChange={set("nationalId")} />
       </div>
-      <Input label="Country of issue" value={form.countryOfIssue} onChange={set("countryOfIssue")} placeholder="US" />
+      <Input label="Country of issue (e.g. US, AE, GB)" value={form.countryOfIssue} onChange={set("countryOfIssue")} placeholder="US" />
+      <div className="grid grid-cols-3 gap-3">
+        <Input label="Phone code" value={form.phoneCountryCode} onChange={set("phoneCountryCode")} placeholder="1" />
+        <div className="col-span-2">
+          <Input label="Phone number" value={form.phoneNumber} onChange={set("phoneNumber")} placeholder="5551234567" />
+        </div>
+      </div>
       <Input label="Street address" value={form.line1} onChange={set("line1")} />
       <div className="grid grid-cols-3 gap-3">
         <Input label="City" value={form.city} onChange={set("city")} />
