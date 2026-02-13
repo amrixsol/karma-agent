@@ -21,7 +21,7 @@ import * as path from "node:path";
 import * as readline from "node:readline";
 import { exec } from "node:child_process";
 
-const BASE_URL = "https://agents.karmapay.xyz";
+const BASE_URL = process.env.KARMA_API_URL || "https://agents.karmapay.xyz";
 const STATE_FILE = path.join(
   process.env.HOME || process.env.USERPROFILE || ".",
   ".karma-agent.json",
@@ -125,17 +125,46 @@ async function stepRegister(state: AgentState): Promise<AgentState> {
 
   log("\nRegistering...");
   const res = await api<{
-    account_id: string;
-    secret_key: string;
+    account_id?: string;
+    secret_key?: string;
+    requires_otp?: boolean;
+    email?: string;
     message: string;
   }>("/api/register", {
     method: "POST",
     body: { email },
   });
 
+  // Existing account — verify with OTP
+  if (res.requires_otp) {
+    log(`\nAccount found. Verification code sent to ${res.email}`);
+    const code = await ask("Enter the 6-digit code from your email: ");
+
+    log("\nVerifying...");
+    const verifyRes = await api<{
+      account_id: string;
+      secret_key: string;
+      message: string;
+    }>("/api/register/verify", {
+      method: "POST",
+      body: { email, code },
+    });
+
+    state.email = email;
+    state.account_id = verifyRes.account_id;
+    state.owner_key = verifyRes.secret_key;
+    saveState(state);
+
+    log(`\nVerified! Account: ${verifyRes.account_id}`);
+    log(`Owner key: ${verifyRes.secret_key}`);
+    log(`\n** Save this key — it is shown only once. **`);
+    return state;
+  }
+
+  // New account — key returned immediately
   state.email = email;
-  state.account_id = res.account_id;
-  state.owner_key = res.secret_key;
+  state.account_id = res.account_id!;
+  state.owner_key = res.secret_key!;
   saveState(state);
 
   log(`\nAccount created: ${res.account_id}`);
@@ -155,16 +184,38 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
 
   header("Step 2: KYC Verification");
 
-  // Check if already submitted to Rain
-  if (state.kyc_status && state.kyc_status !== "not_started") {
-    log("KYC already submitted. Checking status...");
+  // Check current status from server first
+  log("Checking KYC status...");
+  try {
+    const statusRes = await api<{
+      status: string;
+      kyc_url: string | null;
+      reason: string | null;
+    }>("/api/kyc/status", {
+      apiKey: state.owner_key,
+    });
+
+    state.kyc_status = statusRes.status;
+    saveState(state);
+
+    if (statusRes.status === "approved") {
+      log("KYC already approved!");
+      return state;
+    }
+  } catch {
+    // No KYC yet — continue to form
+  }
+
+  // Already submitted to Rain — poll for result
+  if (state.kyc_status && state.kyc_status !== "not_started" && state.kyc_status !== "approved") {
+    log("KYC submitted. Waiting for approval...");
     return await pollKycStatus(state);
   }
 
   // Open dashboard with owner key — KYC form is integrated in the app
   const kycPageUrl = `${BASE_URL}/dashboard#${state.owner_key}`;
 
-  log("Opening identity verification in your browser...\n");
+  log("\nOpening identity verification in your browser...\n");
   log(`  ${BASE_URL}/dashboard\n`);
   openUrl(kycPageUrl);
   log("Fill in your details and complete verification in the browser.");
@@ -220,6 +271,57 @@ async function stepCreateCard(state: AgentState): Promise<AgentState> {
   }
 
   header("Step 3: Create Virtual Card");
+
+  // Check for existing cards first
+  log("Checking for existing cards...");
+  try {
+    const existing = await api<{
+      cards: Array<{
+        card_id: string;
+        last4: string;
+        status: string;
+        name: string | null;
+        deposit_address: string | null;
+        balance: number | null;
+        limits: { per_txn: number; daily: number; monthly: number };
+      }>;
+    }>("/api/cards", { apiKey: state.owner_key });
+
+    if (existing.cards.length > 0) {
+      const card = existing.cards[0];
+      log(`\nFound existing card: **** ${card.last4} (${card.name || "unnamed"})`);
+      log("Rotating agent key...");
+
+      const rotated = await api<{
+        agent_api_key: string;
+        message: string;
+      }>(`/api/cards/${card.card_id}/rotate-key`, {
+        method: "POST",
+        apiKey: state.owner_key,
+      });
+
+      state.card_id = card.card_id;
+      state.agent_key = rotated.agent_api_key;
+      state.deposit_address = card.deposit_address || "";
+      state.card_last4 = card.last4;
+      state.card_name = card.name || "Karma Agent Card";
+      saveState(state);
+
+      log(`\nCard recovered!`);
+      log(`  Name:     ${state.card_name}`);
+      log(`  Last 4:   ${card.last4}`);
+      log(`  Limits:   $${card.limits.per_txn}/txn, $${card.limits.daily}/day, $${card.limits.monthly}/month`);
+      log(`\n  Deposit address (send USDC here):`);
+      log(`  ${state.deposit_address}`);
+      log(`\n  Agent API key:`);
+      log(`  ${rotated.agent_api_key}`);
+      log(`\n** Save the agent key — it will not be shown again. **`);
+
+      return state;
+    }
+  } catch {
+    // No existing cards — continue to create
+  }
 
   const name =
     (await ask("Card name (e.g. Shopping Agent): ")) || "Karma Agent Card";
