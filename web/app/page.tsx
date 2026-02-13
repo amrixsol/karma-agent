@@ -344,6 +344,16 @@ function KarmaLogo({ className = "" }: { className?: string }) {
 export default function Home() {
   return (
     <div className="min-h-screen relative overflow-hidden bg-white text-[#111]">
+      {/* Announcement bar */}
+      <a
+        href="https://colosseum.com/agent-hackathon/projects/karma-agent-cards?from=leaderboard"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative z-30 block w-full bg-[#111] text-center py-2 px-4 text-xs text-white/70 hover:text-white transition-colors"
+      >
+        &#127942; We&apos;re competing in Solana&apos;s first AI Agent Hackathon — <span className="text-white underline underline-offset-2">vote for us</span>
+      </a>
+
       {/* Background glow */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-karma-purple/[0.07] blur-[120px]" />
