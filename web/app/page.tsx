@@ -367,6 +367,7 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-1">
             <a href="#how-it-works" className="px-2.5 py-1.5 rounded-md text-xs font-medium text-black/40 hover:text-black/60 transition-colors">How it works</a>
             <a href="#demo" className="px-2.5 py-1.5 rounded-md text-xs font-medium text-black/40 hover:text-black/60 transition-colors">Demo</a>
+            <a href="#video" className="px-2.5 py-1.5 rounded-md text-xs font-medium text-black/40 hover:text-black/60 transition-colors">Video</a>
           </div>
           <Link
             href="/dashboard"
@@ -387,7 +388,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-karma-pink/8 blur-[70px] rounded-full scale-125 translate-x-6" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/card.png"
+                src="https://imagedelivery.net/nt6NYzDSWpHuFP3mrObYNQ/475a75d9-2637-4c9e-e7e9-0891b4ed0900/public"
                 alt="Karma Agent Card"
                 className="relative w-full max-w-[300px] drop-shadow-2xl"
               />
@@ -417,9 +418,9 @@ export default function Home() {
             <p className="text-xs text-black/30 mb-4">Powered by</p>
             <div className="flex items-center justify-center gap-8 md:gap-12">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/solana-logo.svg" alt="Solana" className="h-4 opacity-50" />
+              <img src="https://imagedelivery.net/nt6NYzDSWpHuFP3mrObYNQ/1e5abb82-8500-455b-4198-a68a18bfa100/public" alt="Solana" className="h-4 opacity-50" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/circle-logo.svg" alt="Circle" className="h-5 opacity-50" />
+              <img src="https://imagedelivery.net/nt6NYzDSWpHuFP3mrObYNQ/b6dc88a0-87b3-465a-2170-1218fc0df400/public" alt="Circle" className="h-5 opacity-50" />
             </div>
           </motion.div>
 
@@ -476,6 +477,26 @@ export default function Home() {
           </motion.h2>
           <motion.div {...fade(0.1)}>
             <AnimatedChat />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══ Video ═══ */}
+      <section id="video" className="relative z-10 px-6 md:px-[120px] py-20 md:py-28">
+        <div className="max-w-[960px] mx-auto">
+          <motion.p {...fade()} className="text-xs font-mono text-karma-purple/60 uppercase tracking-[0.2em] text-center mb-3">
+            Watch
+          </motion.p>
+          <motion.h2 {...fade(0.05)} className="text-2xl md:text-3xl font-medium tracking-tight text-center mb-12">
+            Karma Card in 2 minutes
+          </motion.h2>
+          <motion.div {...fade(0.1)} className="relative w-full aspect-video rounded-2xl overflow-hidden border border-black/[0.06] shadow-sm bg-black">
+            <iframe
+              src="https://customer-n0noevuwva7213vx.cloudflarestream.com/197b4409afad928b9840fd5b58c81247/iframe"
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+              allowFullScreen
+            />
           </motion.div>
         </div>
       </section>
