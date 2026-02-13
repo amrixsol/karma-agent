@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useState } from "react";
 
 const fade = (delay = 0) => ({
-  initial: { opacity: 0, y: 16 },
+  initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-40px" },
-  transition: { duration: 0.5, delay },
+  transition: { duration: 0.6, delay, ease: [0, 0, 0.2, 1] as const },
 });
 
 const DEMO_MESSAGES = [
@@ -25,20 +25,6 @@ const DEMO_MESSAGES = [
     a: "Checked: $9.98 + $0.16 fees = $10.14 total. You have $427.50 available. Yes, you can afford it.",
   },
 ];
-
-function TypingDots() {
-  return (
-    <span className="inline-flex gap-1 ml-1">
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="w-1.5 h-1.5 rounded-full bg-karma-purple/60"
-          style={{ animation: `pulse 1.2s ease-in-out ${i * 0.15}s infinite` }}
-        />
-      ))}
-    </span>
-  );
-}
 
 function ChatDemo() {
   const [active, setActive] = useState(0);
@@ -58,13 +44,11 @@ function ChatDemo() {
 
       {/* Chat body */}
       <div className="rounded-b-2xl bg-white/[0.02] border border-white/[0.08] border-t-white/[0.04] p-5 min-h-[180px] md:min-h-[200px]">
-        {/* User message */}
         <div className="flex justify-end mb-4">
           <div className="bg-karma-purple/20 border border-karma-purple/20 rounded-2xl rounded-br-md px-4 py-2.5 max-w-[85%]">
             <p className="text-sm text-white/90">{msg.q}</p>
           </div>
         </div>
-        {/* Agent response */}
         <div className="flex justify-start">
           <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl rounded-bl-md px-4 py-2.5 max-w-[85%]">
             <p className="text-sm text-white/70">{msg.a}</p>
@@ -116,7 +100,7 @@ function CardMockup() {
         {/* Card number */}
         <div className="relative z-10">
           <p className="font-mono text-lg md:text-xl tracking-[0.2em] text-white/80">
-            4821 •••• •••• 7340
+            4821 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 7340
           </p>
         </div>
 
@@ -260,50 +244,49 @@ export default function Home() {
         <div className="absolute bottom-[-200px] right-[-100px] w-[500px] h-[500px] rounded-full bg-karma-pink/[0.04] blur-[120px]" />
       </div>
 
+      {/* Vertical divider lines — matching website-new */}
+      <div className="fixed inset-0 pointer-events-none mx-auto max-w-[1440px] hidden lg:block">
+        <div className="absolute left-[60px] top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.04] to-transparent" />
+        <div className="absolute right-[60px] top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.04] to-transparent" />
+      </div>
+
       {/* Nav */}
-      <nav className="relative z-20 w-full px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/karma-logo.png" alt="Karma" className="h-8 w-auto" />
-            <span className="text-sm font-semibold tracking-tight hidden sm:inline">Karma Card</span>
+      <nav className="relative z-20 w-full px-6 md:px-[120px] py-4">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <img src="/karma-logo.png" alt="Karma" className="h-[26px] w-auto" />
+            <span className="text-xs font-medium tracking-[-0.24px] text-white/80 hidden sm:inline">Karma Card</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm text-white/40">
-            <a href="#how-it-works" className="hover:text-white/70 transition-colors">How it works</a>
-            <a href="#features" className="hover:text-white/70 transition-colors">Features</a>
-            <a href="#quickstart" className="hover:text-white/70 transition-colors">Quickstart</a>
+          <div className="hidden md:flex items-center gap-1">
+            <a href="#how-it-works" className="px-2 py-1.5 rounded-md text-xs font-medium tracking-[-0.24px] text-white/40 hover:bg-white/5 transition-colors">How it works</a>
+            <a href="#features" className="px-2 py-1.5 rounded-md text-xs font-medium tracking-[-0.24px] text-white/40 hover:bg-white/5 transition-colors">Features</a>
+            <a href="#quickstart" className="px-2 py-1.5 rounded-md text-xs font-medium tracking-[-0.24px] text-white/40 hover:bg-white/5 transition-colors">Quickstart</a>
+            <Link href="/agent" className="px-2 py-1.5 rounded-md text-xs font-medium tracking-[-0.24px] text-white/40 hover:bg-white/5 transition-colors">API Docs</Link>
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/agent"
-              className="text-sm text-white/50 hover:text-white/80 transition-colors hidden sm:inline"
-            >
-              API Docs
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium bg-karma-purple hover:bg-karma-pink px-4 py-2 rounded-lg transition-colors"
-            >
-              Get Started
-            </Link>
-          </div>
+          <Link
+            href="/dashboard"
+            className="rounded-full bg-white px-3.5 py-1.5 text-xs font-medium tracking-[-0.12px] text-[#1d1d1d] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] hover:bg-gray-100 transition-colors"
+          >
+            Get Started
+          </Link>
         </div>
       </nav>
 
       {/* ═══ Hero ═══ */}
-      <section className="relative z-10 px-6 pt-16 pb-24 md:pt-24 md:pb-32">
-        <div className="max-w-6xl mx-auto">
+      <section className="relative z-10 px-6 md:px-[120px] pt-20 pb-24 md:pt-28 md:pb-36">
+        <div className="max-w-[1440px] mx-auto">
           {/* Badge */}
-          <motion.div {...fade(0)} className="flex justify-center mb-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] py-1.5 pl-1.5 pr-4">
-              <span className="rounded-full bg-karma-purple px-2.5 py-0.5 text-xs font-medium">New</span>
-              <span className="text-xs text-white/50">Give your AI agent a credit card</span>
+          <motion.div {...fade(0)} className="flex justify-center mb-6">
+            <div className="inline-flex h-[26px] items-center gap-2 rounded-[100px] border-[0.5px] border-white/10 bg-gradient-to-r from-white/5 to-white/10 px-[7px] py-1 backdrop-blur-[50px] shadow-[0px_1px_1px_rgba(0,0,0,0.04),0px_1px_3px_rgba(29,29,29,0.02),inset_0px_0px_10px_rgba(255,255,255,0.05)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-karma-green animate-glow" />
+              <span className="text-[11px] font-normal tracking-[-0.11px] text-white">Give your AI agent a credit card</span>
             </div>
           </motion.div>
 
           {/* Headline */}
           <motion.h1
-            {...fade(0.05)}
-            className="text-5xl md:text-7xl font-bold text-center tracking-tight leading-[1.05] mb-6"
+            {...fade(0.1)}
+            className="text-4xl sm:text-5xl lg:text-[68px] font-medium text-center leading-none tracking-[-0.68px] mb-5"
           >
             The credit card<br />
             <span className="bg-gradient-to-r from-karma-purple via-karma-pink to-karma-purple bg-clip-text text-transparent">
@@ -312,35 +295,35 @@ export default function Home() {
           </motion.h1>
 
           <motion.p
-            {...fade(0.1)}
-            className="text-lg md:text-xl text-white/45 text-center max-w-2xl mx-auto mb-12 leading-relaxed"
+            {...fade(0.2)}
+            className="text-base font-normal leading-[1.7] tracking-[-0.16px] text-white/60 text-center max-w-xl mx-auto mb-10"
           >
             Fund with USDC on Solana. Spend anywhere cards are accepted.
             Programmable limits, scoped keys, full owner control.
           </motion.p>
 
           {/* CTAs */}
-          <motion.div {...fade(0.15)} className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-20">
+          <motion.div {...fade(0.3)} className="flex flex-wrap items-center justify-center gap-3.5 mb-24">
             <Link
               href="/dashboard"
-              className="px-6 py-3 bg-karma-purple hover:bg-karma-pink rounded-xl text-sm font-semibold transition-colors"
+              className="relative inline-flex h-10 items-center justify-center gap-2.5 overflow-hidden rounded-[48px] border border-transparent bg-gradient-to-b from-white to-white/90 px-5 text-sm font-medium leading-4 text-black transition-transform duration-200 hover:scale-[1.02]"
             >
               Create Your First Card
             </Link>
             <Link
               href="/agent"
-              className="px-6 py-3 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-xl text-sm font-medium transition-colors"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-[38px] border-[0.5px] border-white/20 bg-white/[0.06] px-5 py-1.5 text-sm font-medium text-white transition-all duration-200 hover:bg-white/[0.12]"
             >
               View API Docs
             </Link>
           </motion.div>
 
-          {/* Card mockup + chat demo side by side on desktop */}
+          {/* Card mockup + chat demo side by side */}
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-5xl mx-auto">
-            <motion.div {...fade(0.2)} className="flex justify-center">
+            <motion.div {...fade(0.35)} className="flex justify-center">
               <CardMockup />
             </motion.div>
-            <motion.div {...fade(0.25)}>
+            <motion.div {...fade(0.4)}>
               <ChatDemo />
             </motion.div>
           </div>
@@ -348,24 +331,24 @@ export default function Home() {
       </section>
 
       {/* ═══ How it works ═══ */}
-      <section id="how-it-works" className="relative z-10 px-6 py-20 md:py-28">
+      <section id="how-it-works" className="relative z-10 px-6 md:px-[120px] py-20 md:py-28">
         <div className="max-w-5xl mx-auto">
           <motion.div {...fade()} className="text-center mb-16">
             <p className="text-xs font-mono text-karma-purple/80 uppercase tracking-[0.2em] mb-3">How it works</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-medium tracking-tight leading-tight">
               From zero to spending<br className="hidden md:inline" /> in four steps
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-4 gap-5">
             {STEPS.map((step, i) => (
               <motion.div
                 key={step.num}
                 {...fade(i * 0.08)}
-                className="relative glass rounded-2xl p-6"
+                className="relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 hover:border-white/[0.1] hover:bg-white/[0.04] transition-all"
               >
                 <span className="text-3xl font-bold text-karma-purple/20 font-mono">{step.num}</span>
-                <h3 className="text-base font-semibold mt-3 mb-2">{step.title}</h3>
+                <h3 className="text-base font-medium mt-3 mb-2">{step.title}</h3>
                 <p className="text-sm text-white/40 leading-relaxed">{step.desc}</p>
               </motion.div>
             ))}
@@ -374,26 +357,26 @@ export default function Home() {
       </section>
 
       {/* ═══ Features ═══ */}
-      <section id="features" className="relative z-10 px-6 py-20 md:py-28">
+      <section id="features" className="relative z-10 px-6 md:px-[120px] py-20 md:py-28">
         <div className="max-w-5xl mx-auto">
           <motion.div {...fade()} className="text-center mb-16">
             <p className="text-xs font-mono text-karma-purple/80 uppercase tracking-[0.2em] mb-3">Security & control</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-medium tracking-tight leading-tight">
               Built for autonomous spending<br className="hidden md:inline" /> with human oversight
             </h2>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.title}
                 {...fade(i * 0.05)}
-                className="glass rounded-2xl p-6 group hover:border-karma-purple/20 transition-colors"
+                className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 group hover:border-karma-purple/20 hover:bg-white/[0.04] transition-all"
               >
                 <div className="w-10 h-10 rounded-xl bg-karma-purple/10 flex items-center justify-center text-karma-purple mb-4 group-hover:bg-karma-purple/20 transition-colors">
                   {f.icon}
                 </div>
-                <h3 className="text-base font-semibold mb-2">{f.title}</h3>
+                <h3 className="text-base font-medium mb-2">{f.title}</h3>
                 <p className="text-sm text-white/40 leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
@@ -402,23 +385,23 @@ export default function Home() {
       </section>
 
       {/* ═══ Two payment paths ═══ */}
-      <section className="relative z-10 px-6 py-20 md:py-28">
+      <section className="relative z-10 px-6 md:px-[120px] py-20 md:py-28">
         <div className="max-w-5xl mx-auto">
           <motion.div {...fade()} className="text-center mb-16">
             <p className="text-xs font-mono text-karma-purple/80 uppercase tracking-[0.2em] mb-3">Where agents pay</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-medium tracking-tight">
               Two ways to spend
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <motion.div {...fade(0.05)} className="glass rounded-3xl p-8 border-white/[0.06]">
+          <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
+            <motion.div {...fade(0.05)} className="rounded-3xl border border-white/[0.06] bg-white/[0.02] p-8 hover:border-white/[0.1] hover:bg-white/[0.04] transition-all">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-karma-purple/20 to-karma-pink/10 flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-karma-purple" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Anywhere cards are accepted</h3>
+              <h3 className="text-xl font-medium mb-3">Anywhere cards are accepted</h3>
               <p className="text-sm text-white/40 leading-relaxed">
                 Virtual cards work at any online checkout — API subscriptions, cloud
                 hosting, SaaS tools, domain registrations, and more. Agents get their
@@ -426,13 +409,13 @@ export default function Home() {
               </p>
             </motion.div>
 
-            <motion.div {...fade(0.1)} className="glass rounded-3xl p-8 border-white/[0.06]">
+            <motion.div {...fade(0.1)} className="rounded-3xl border border-white/[0.06] bg-white/[0.02] p-8 hover:border-white/[0.1] hover:bg-white/[0.04] transition-all">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-karma-green/20 to-karma-green/5 flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-karma-green" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3">On-chain with USDC</h3>
+              <h3 className="text-xl font-medium mb-3">On-chain with USDC</h3>
               <p className="text-sm text-white/40 leading-relaxed">
                 Funded by USDC on Solana. Each card has its own wallet address —
                 no custodial pool, no off-chain ledger. Deposits and withdrawals
@@ -444,14 +427,14 @@ export default function Home() {
       </section>
 
       {/* ═══ Quickstart ═══ */}
-      <section id="quickstart" className="relative z-10 px-6 py-20 md:py-28">
+      <section id="quickstart" className="relative z-10 px-6 md:px-[120px] py-20 md:py-28">
         <div className="max-w-5xl mx-auto">
           <motion.div {...fade()} className="text-center mb-12">
             <p className="text-xs font-mono text-karma-purple/80 uppercase tracking-[0.2em] mb-3">Quickstart</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+            <h2 className="text-3xl md:text-4xl font-medium tracking-tight mb-4">
               One API call to start
             </h2>
-            <p className="text-white/40 max-w-lg mx-auto">
+            <p className="text-white/40 max-w-lg mx-auto text-base leading-[1.7]">
               Register, verify, create a card, and start spending — all through a simple REST API.
             </p>
           </motion.div>
@@ -472,7 +455,7 @@ export default function Home() {
       </section>
 
       {/* ═══ Built on ═══ */}
-      <section className="relative z-10 px-6 py-16">
+      <section className="relative z-10 px-6 md:px-[120px] py-16">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs font-mono text-white/20 uppercase tracking-[0.2em] mb-6">Built on</p>
           <div className="flex items-center justify-center gap-10 md:gap-14 text-white/20">
@@ -504,31 +487,31 @@ export default function Home() {
       </section>
 
       {/* ═══ CTA ═══ */}
-      <section className="relative z-10 px-6 py-20 md:py-28">
+      <section className="relative z-10 px-6 md:px-[120px] py-20 md:py-28">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h2
             {...fade()}
-            className="text-3xl md:text-5xl font-bold tracking-tight mb-4"
+            className="text-3xl md:text-5xl font-medium tracking-tight mb-5"
           >
             Let your agent pay for anything
           </motion.h2>
           <motion.p
             {...fade(0.05)}
-            className="text-lg text-white/40 mb-10"
+            className="text-base text-white/40 leading-[1.7] mb-10"
           >
             Securely, with programmable limits and full human control.
           </motion.p>
-          <motion.div {...fade(0.1)} className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <motion.div {...fade(0.1)} className="flex flex-wrap items-center justify-center gap-3.5">
             <Link
               href="/dashboard"
-              className="px-8 py-3.5 bg-karma-purple hover:bg-karma-pink rounded-xl text-sm font-semibold transition-colors"
+              className="relative inline-flex h-10 items-center justify-center overflow-hidden rounded-[48px] border border-transparent bg-gradient-to-b from-white to-white/90 px-6 text-sm font-medium text-black transition-transform duration-200 hover:scale-[1.02]"
             >
               Get Started Free
             </Link>
             <a
-              href="https://github.com/amrixsol/karma-agent"
+              href="https://github.com/AquaAgent/karma-agent"
               target="_blank"
-              className="px-8 py-3.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-xl text-sm font-medium transition-colors"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-[38px] border-[0.5px] border-white/20 bg-white/[0.06] px-6 text-sm font-medium text-white transition-all duration-200 hover:bg-white/[0.12]"
             >
               View on GitHub
             </a>
@@ -537,9 +520,9 @@ export default function Home() {
       </section>
 
       {/* ═══ Footer ═══ */}
-      <footer className="relative z-10 border-t border-white/[0.06] px-6 py-8">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <footer className="relative z-10 border-t border-white/[0.06] px-6 md:px-[120px] py-8">
+        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
             <img src="/karma-logo.png" alt="Karma" className="h-5 w-auto opacity-50" />
             <span className="text-xs text-white/25">Built by the team at karmapay.xyz</span>
           </div>
@@ -550,7 +533,7 @@ export default function Home() {
             <a href="https://x.com/karmawallet" target="_blank" className="hover:text-white/50 transition-colors">
               @karmawallet
             </a>
-            <a href="https://github.com/amrixsol/karma-agent" target="_blank" className="hover:text-white/50 transition-colors">
+            <a href="https://github.com/AquaAgent/karma-agent" target="_blank" className="hover:text-white/50 transition-colors">
               GitHub
             </a>
           </div>
