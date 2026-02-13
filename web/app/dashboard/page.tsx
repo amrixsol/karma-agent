@@ -200,13 +200,61 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
   const [kycUrl, setKycUrl] = useState("");
   const [polling, setPolling] = useState(false);
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [country, setCountry] = useState("");
+  const [nationalId, setNationalId] = useState("");
+  const [phoneCode, setPhoneCode] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [line1, setLine1] = useState("");
+  const [city, setCity] = useState("");
+  const [region, setRegion] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+
+  const countries = [
+    { code: "US", name: "United States" }, { code: "AE", name: "United Arab Emirates" },
+    { code: "GB", name: "United Kingdom" }, { code: "DE", name: "Germany" },
+    { code: "FR", name: "France" }, { code: "ES", name: "Spain" },
+    { code: "IT", name: "Italy" }, { code: "NL", name: "Netherlands" },
+    { code: "CH", name: "Switzerland" }, { code: "SG", name: "Singapore" },
+    { code: "AU", name: "Australia" }, { code: "JP", name: "Japan" },
+    { code: "BR", name: "Brazil" }, { code: "CA", name: "Canada" },
+    { code: "IE", name: "Ireland" }, { code: "PT", name: "Portugal" },
+    { code: "SE", name: "Sweden" }, { code: "NO", name: "Norway" },
+    { code: "DK", name: "Denmark" }, { code: "FI", name: "Finland" },
+    { code: "AT", name: "Austria" }, { code: "BE", name: "Belgium" },
+    { code: "PL", name: "Poland" }, { code: "CZ", name: "Czech Republic" },
+    { code: "HU", name: "Hungary" }, { code: "RO", name: "Romania" },
+    { code: "GR", name: "Greece" }, { code: "HR", name: "Croatia" },
+    { code: "HK", name: "Hong Kong" }, { code: "KR", name: "South Korea" },
+    { code: "MY", name: "Malaysia" }, { code: "MX", name: "Mexico" },
+    { code: "CO", name: "Colombia" }, { code: "AR", name: "Argentina" },
+    { code: "ZA", name: "South Africa" }, { code: "SA", name: "Saudi Arabia" },
+    { code: "QA", name: "Qatar" }, { code: "NZ", name: "New Zealand" },
+    { code: "IL", name: "Israel" }, { code: "TR", name: "Turkey" },
+    { code: "IN", name: "India" },
+  ];
+
   const submit = async () => {
+    if (!firstName || !lastName) { setError("Name is required."); return; }
+    if (!birthDate) { setError("Date of birth is required."); return; }
+    if (!country) { setError("Country is required."); return; }
+    if (!nationalId) { setError("National ID is required."); return; }
+    if (!line1 || !city || !region || !postalCode) { setError("Full address is required."); return; }
+
     setLoading(true);
     setError("");
     try {
       const res = await api<{ status: string; kyc_url: string | null }>("/api/kyc", {
         method: "POST",
         key: ownerKey,
+        body: {
+          firstName, lastName, birthDate, countryOfIssue: country, nationalId,
+          phoneCountryCode: phoneCode.replace("+", ""),
+          phoneNumber: phoneNumber.replace(/\D/g, ""),
+          address: { line1, city, region, postalCode, countryCode: country },
+        },
       });
       if (res.status === "approved") {
         onComplete();
@@ -240,9 +288,9 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
       <div className="space-y-4">
         <div className="bg-karma-purple/5 border border-karma-purple/10 rounded-xl p-4">
           <p className="text-karma-purple text-sm font-medium mb-2">Verification required</p>
-          <p className="text-xs text-black/40 mb-3">Complete identity verification (ID + selfie) on the secure page below:</p>
+          <p className="text-xs text-black/40 mb-3">Complete identity verification with our card partner:</p>
           <a href={kycUrl} target="_blank" rel="noopener noreferrer" className="inline-block bg-karma-purple hover:bg-karma-purple/90 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-            Open Verification Page
+            Complete Verification
           </a>
         </div>
         <div className="flex items-center gap-3 text-sm text-black/40">
@@ -254,12 +302,54 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-black/45">
-        Click below to open a secure verification page where you&apos;ll upload an ID document and take a selfie. No personal info is stored on our end.
-      </p>
+    <div className="space-y-5">
+      <p className="text-sm text-black/45">Required for card issuance. Sent directly to our card partner.</p>
+
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-black/25 mb-3">Identity</p>
+        <div className="grid grid-cols-2 gap-3">
+          <Input label="First Name" value={firstName} onChange={setFirstName} placeholder="John" />
+          <Input label="Last Name" value={lastName} onChange={setLastName} placeholder="Doe" />
+        </div>
+        <div className="mt-3">
+          <Input label="Date of Birth" value={birthDate} onChange={setBirthDate} type="date" />
+        </div>
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          <div>
+            <label className="block text-xs text-black/40 mb-1.5">Country</label>
+            <select
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className="w-full bg-black/[0.03] border border-black/[0.08] rounded-lg px-3 py-2.5 text-sm text-[#111] focus:outline-none focus:border-karma-purple/50 transition-colors appearance-none"
+            >
+              <option value="">Select...</option>
+              {countries.map((c) => (
+                <option key={c.code} value={c.code}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <Input label={country === "US" ? "SSN (9 digits)" : "National ID"} value={nationalId} onChange={setNationalId} placeholder="ID number" />
+        </div>
+        <div className="grid grid-cols-[0.4fr_1fr] gap-3 mt-3">
+          <Input label="Code" value={phoneCode} onChange={setPhoneCode} placeholder="+1" />
+          <Input label="Phone Number" value={phoneNumber} onChange={setPhoneNumber} placeholder="555 123 4567" />
+        </div>
+      </div>
+
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-black/25 mb-3">Address</p>
+        <div className="space-y-3">
+          <Input label="Street Address" value={line1} onChange={setLine1} placeholder="123 Main St" />
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="City" value={city} onChange={setCity} placeholder="New York" />
+            <Input label="State / Region" value={region} onChange={setRegion} placeholder="NY" />
+          </div>
+          <Input label="Postal Code" value={postalCode} onChange={setPostalCode} placeholder="10001" />
+        </div>
+      </div>
+
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <Button onClick={submit} loading={loading}>Start Verification</Button>
+      <Button onClick={submit} loading={loading}>Continue</Button>
     </div>
   );
 }
@@ -426,6 +516,16 @@ export default function DashboardPage() {
   const [ownerKey, setOwnerKey] = useState("");
   const [card, setCard] = useState<CardInfo | null>(null);
   const [agentKey, setAgentKey] = useState("");
+
+  // Accept owner key from URL hash (e.g. /dashboard#sk_live_...) — skip to KYC
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash && hash.startsWith("sk_live_")) {
+      setOwnerKey(hash);
+      setStep("kyc");
+      history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
 
   const stepTitles: Record<Step, string> = {
     register: "Create your account",

@@ -155,52 +155,26 @@ async function stepKyc(state: AgentState): Promise<AgentState> {
 
   header("Step 2: KYC Verification");
 
-  // Check if KYC was already submitted
-  if (state.kyc_url) {
+  // Check if already submitted to Rain
+  if (state.kyc_status && state.kyc_status !== "not_started") {
     log("KYC already submitted. Checking status...");
     return await pollKycStatus(state);
   }
 
-  log("Starting identity verification...\n");
-  log("No personal info needed here — you'll verify your identity");
-  log("(ID document + selfie) on a secure third-party page.\n");
+  // Open dashboard with owner key — KYC form is integrated in the app
+  const kycPageUrl = `${BASE_URL}/dashboard#${state.owner_key}`;
 
-  log("Requesting verification link...");
-  const res = await api<{
-    status: string;
-    kyc_url: string | null;
-  }>("/api/kyc", {
-    method: "POST",
-    apiKey: state.owner_key,
-  });
-
-  state.kyc_status = res.status;
-  state.kyc_url = res.kyc_url || undefined;
-  saveState(state);
-
-  if (res.status === "approved") {
-    log("\nKYC approved instantly!");
-    return state;
-  }
-
-  if (res.kyc_url) {
-    log(`\nOpening verification link in your browser...`);
-    log(`  ${res.kyc_url}\n`);
-    openUrl(res.kyc_url);
-    log(`Complete the identity verification (ID + selfie) in your browser.`);
-  }
+  log("Opening identity verification in your browser...\n");
+  log(`  ${BASE_URL}/dashboard\n`);
+  openUrl(kycPageUrl);
+  log("Fill in your details and complete verification in the browser.");
+  log("This terminal will detect when you're approved.\n");
 
   return await pollKycStatus(state);
 }
 
 async function pollKycStatus(state: AgentState): Promise<AgentState> {
   log("Waiting for KYC approval...");
-
-  if (state.kyc_url) {
-    log(`\nVerification link: ${state.kyc_url}`);
-    log(`(Opening in browser...)\n`);
-    openUrl(state.kyc_url);
-  }
 
   while (true) {
     try {
@@ -216,12 +190,12 @@ async function pollKycStatus(state: AgentState): Promise<AgentState> {
       saveState(state);
 
       if (res.status === "approved") {
-        log("\nKYC approved!");
+        log("\n\nKYC approved!");
         return state;
       }
 
-      if (res.status === "rejected") {
-        log(`\nKYC rejected. Reason: ${res.reason || "unknown"}`);
+      if (res.status === "denied" || res.status === "rejected" || res.status === "canceled" || res.status === "locked") {
+        log(`\n\nKYC denied. Reason: ${res.reason || "unknown"}`);
         process.exit(1);
       }
 
