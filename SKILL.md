@@ -17,30 +17,11 @@ curl -X POST https://agents.karmapay.xyz/api/register \
   -d '{"email":"you@example.com"}'
 # Returns: { account_id, secret_key: "sk_live_..." }
 
-# 2. Submit KYC details and get verification link
+# 2. Start KYC — no request body needed (zero PII touches your API)
 curl -X POST https://agents.karmapay.xyz/api/kyc \
-  -H "Authorization: Bearer sk_live_..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "firstName": "Jane",
-    "lastName": "Doe",
-    "email": "jane@example.com",
-    "birthDate": "1990-01-15",
-    "nationalId": "123456789",
-    "countryOfIssue": "US",
-    "phoneCountryCode": "1",
-    "phoneNumber": "5551234567",
-    "address": {
-      "line1": "123 Main St",
-      "city": "San Francisco",
-      "region": "CA",
-      "postalCode": "94105",
-      "countryCode": "US"
-    },
-    "ipAddress": "0.0.0.0"
-  }'
-# Returns: { status: "needsVerification", kyc_url: "https://..." }
-# Human opens kyc_url in browser to complete identity verification.
+  -H "Authorization: Bearer sk_live_..."
+# Returns: { status: "pending_verification", kyc_url: "https://in.sumsub.com/..." }
+# Human opens kyc_url in browser to complete identity verification (ID + selfie).
 # Agent polls GET /api/kyc/status until status is "approved".
 
 # 3. Create a card for your agent

@@ -9,24 +9,8 @@ export interface RegisterResponse {
   secret_key: string;
 }
 
-export interface KycRequest {
-  firstName: string;
-  lastName: string;
-  email: string;
-  birthDate: string;
-  nationalId: string;
-  countryOfIssue: string;
-  phoneCountryCode: string;
-  phoneNumber: string;
-  address: {
-    line1: string;
-    city: string;
-    region: string;
-    postalCode: string;
-    countryCode: string;
-  };
-  ipAddress: string;
-}
+/** POST /api/kyc — no request body needed (zero PII touches your API) */
+export type KycRequest = Record<string, never>;
 
 export interface KycResponse {
   status: string;

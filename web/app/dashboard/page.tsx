@@ -193,17 +193,10 @@ function RegisterStep({
 // ─── KYC Step ───────────────────────────────────────────────────────────────
 
 function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () => void }) {
-  const [form, setForm] = useState({
-    firstName: "", lastName: "", email: "", birthDate: "", nationalId: "",
-    countryOfIssue: "US", phoneCountryCode: "1", phoneNumber: "",
-    line1: "", city: "", region: "", postalCode: "", countryCode: "US",
-  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [kycUrl, setKycUrl] = useState("");
   const [polling, setPolling] = useState(false);
-
-  const set = (key: string) => (val: string) => setForm((f) => ({ ...f, [key]: val }));
 
   const submit = async () => {
     setLoading(true);
@@ -212,18 +205,6 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
       const res = await api<{ status: string; kyc_url: string | null }>("/api/kyc", {
         method: "POST",
         key: ownerKey,
-        body: {
-          firstName: form.firstName, lastName: form.lastName, email: form.email,
-          birthDate: form.birthDate, nationalId: form.nationalId,
-          countryOfIssue: form.countryOfIssue,
-          phoneCountryCode: form.phoneCountryCode,
-          phoneNumber: form.phoneNumber,
-          address: {
-            line1: form.line1, city: form.city, region: form.region,
-            postalCode: form.postalCode, countryCode: form.countryCode,
-          },
-          ipAddress: "0.0.0.0",
-        },
       });
       if (res.status === "approved") {
         onComplete();
@@ -257,9 +238,9 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
       <div className="space-y-4">
         <div className="bg-karma-purple/10 border border-karma-purple/20 rounded-xl p-4">
           <p className="text-karma-pink text-sm font-medium mb-2">Verification required</p>
-          <p className="text-xs text-white/50 mb-3">Open this link in your browser to complete identity verification:</p>
-          <a href={kycUrl} target="_blank" className="text-sm text-karma-purple hover:text-karma-pink break-all">
-            {kycUrl}
+          <p className="text-xs text-white/50 mb-3">Complete identity verification (ID document + selfie) on the secure page below:</p>
+          <a href={kycUrl} target="_blank" rel="noopener noreferrer" className="inline-block bg-karma-purple hover:bg-karma-pink text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+            Open Verification Page
           </a>
         </div>
         <div className="flex items-center gap-3 text-sm text-white/40">
@@ -272,30 +253,12 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <Input label="First name" value={form.firstName} onChange={set("firstName")} />
-        <Input label="Last name" value={form.lastName} onChange={set("lastName")} />
-      </div>
-      <Input label="Email" value={form.email} onChange={set("email")} type="email" />
-      <div className="grid grid-cols-2 gap-3">
-        <Input label="Date of birth" value={form.birthDate} onChange={set("birthDate")} placeholder="YYYY-MM-DD" />
-        <Input label="National ID / SSN" value={form.nationalId} onChange={set("nationalId")} />
-      </div>
-      <Input label="Country of issue (e.g. US, AE, GB)" value={form.countryOfIssue} onChange={set("countryOfIssue")} placeholder="US" />
-      <div className="grid grid-cols-3 gap-3">
-        <Input label="Phone code" value={form.phoneCountryCode} onChange={set("phoneCountryCode")} placeholder="1" />
-        <div className="col-span-2">
-          <Input label="Phone number" value={form.phoneNumber} onChange={set("phoneNumber")} placeholder="5551234567" />
-        </div>
-      </div>
-      <Input label="Street address" value={form.line1} onChange={set("line1")} />
-      <div className="grid grid-cols-3 gap-3">
-        <Input label="City" value={form.city} onChange={set("city")} />
-        <Input label="State" value={form.region} onChange={set("region")} />
-        <Input label="Postal code" value={form.postalCode} onChange={set("postalCode")} />
-      </div>
+      <p className="text-sm text-white/50">
+        No personal info needed here. Click below to open a secure verification page
+        where you'll upload an ID document and take a selfie.
+      </p>
       {error && <p className="text-karma-red text-sm">{error}</p>}
-      <Button onClick={submit} loading={loading}>Submit KYC</Button>
+      <Button onClick={submit} loading={loading}>Start Verification</Button>
     </div>
   );
 }
