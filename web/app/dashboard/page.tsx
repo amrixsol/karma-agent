@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 
 const API = "https://agents.karmapay.xyz";
 
-type Step = "register" | "kyc" | "create-card" | "dashboard";
+type Step = "register" | "kyc" | "agreements" | "create-card" | "dashboard";
 
 interface CardInfo {
   card_id: string;
@@ -76,22 +76,24 @@ function Button({
   children,
   onClick,
   loading,
+  disabled,
   variant = "primary",
 }: {
   children: React.ReactNode;
   onClick: () => void;
   loading?: boolean;
+  disabled?: boolean;
   variant?: "primary" | "secondary";
 }) {
   const base =
-    "px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer disabled:opacity-50";
+    "px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
   const styles =
     variant === "primary"
       ? "bg-karma-purple hover:bg-karma-purple/90 text-white"
       : "bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.08] text-[#111]";
 
   return (
-    <button onClick={onClick} disabled={loading} className={`${base} ${styles}`}>
+    <button onClick={onClick} disabled={loading || disabled} className={`${base} ${styles}`}>
       {loading ? "Loading..." : children}
     </button>
   );
@@ -101,6 +103,7 @@ function StepIndicator({ current }: { current: Step }) {
   const steps: { key: Step; label: string }[] = [
     { key: "register", label: "Register" },
     { key: "kyc", label: "KYC" },
+    { key: "agreements", label: "Terms" },
     { key: "create-card", label: "Create Card" },
     { key: "dashboard", label: "Dashboard" },
   ];
@@ -150,18 +153,48 @@ function RegisterStep({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ account_id: string; secret_key: string } | null>(null);
+  const [needsOtp, setNeedsOtp] = useState(false);
+  const [maskedEmail, setMaskedEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
 
   const submit = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await api<{ account_id: string; secret_key: string }>("/api/register", {
+      const res = await api<{
+        account_id?: string;
+        secret_key?: string;
+        requires_otp?: boolean;
+        email?: string;
+      }>("/api/register", {
         method: "POST",
         body: { email },
       });
-      setResult(res);
+
+      if (res.requires_otp) {
+        setNeedsOtp(true);
+        setMaskedEmail(res.email || email);
+      } else if (res.account_id && res.secret_key) {
+        setResult({ account_id: res.account_id, secret_key: res.secret_key });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api<{ account_id: string; secret_key: string }>("/api/register/verify", {
+        method: "POST",
+        body: { email, code: otpCode },
+      });
+      setResult(res);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Invalid or expired code");
     } finally {
       setLoading(false);
     }
@@ -171,7 +204,7 @@ function RegisterStep({
     return (
       <div className="space-y-4">
         <div className="bg-karma-green/8 border border-karma-green/15 rounded-xl p-4">
-          <p className="text-karma-green text-sm font-medium mb-2">Account created!</p>
+          <p className="text-karma-green text-sm font-medium mb-2">Account verified!</p>
           <p className="text-xs text-black/40">Account ID: {result.account_id}</p>
         </div>
         <div className="bg-black/[0.03] rounded-xl p-4">
@@ -179,6 +212,19 @@ function RegisterStep({
           <p className="font-mono text-sm text-karma-purple break-all">{result.secret_key}</p>
         </div>
         <Button onClick={() => onComplete(result.secret_key)}>Continue to KYC</Button>
+      </div>
+    );
+  }
+
+  if (needsOtp) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-black/[0.03] rounded-xl p-4">
+          <p className="text-sm text-black/60">Verification code sent to <span className="font-medium text-black/80">{maskedEmail}</span></p>
+        </div>
+        <Input label="6-digit code" value={otpCode} onChange={setOtpCode} placeholder="123456" />
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+        <Button onClick={verifyOtp} loading={loading}>Verify</Button>
       </div>
     );
   }
@@ -354,6 +400,133 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
   );
 }
 
+/* ─── Agreements Step ─── */
+
+function AgreementsStep({
+  ownerKey,
+  onComplete,
+}: {
+  ownerKey: string;
+  onComplete: () => void;
+}) {
+  const [esign, setEsign] = useState(false);
+  const [cardTerms, setCardTerms] = useState(false);
+  const [certify, setCertify] = useState(false);
+  const [noSolicitation, setNoSolicitation] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const allChecked = esign && cardTerms && certify && noSolicitation;
+
+  const submit = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      await api<{ accepted: boolean }>("/api/terms/accept", {
+        method: "POST",
+        key: ownerKey,
+      });
+      onComplete();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to accept terms");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const agreements: {
+    checked: boolean;
+    toggle: () => void;
+    label: React.ReactNode;
+  }[] = [
+    {
+      checked: esign,
+      toggle: () => setEsign(!esign),
+      label: (
+        <>
+          I accept the{" "}
+          <a href="https://karmapay.xyz/esign-consent" target="_blank" rel="noopener noreferrer" className="text-karma-purple hover:text-karma-pink underline">
+            E-Sign Consent
+          </a>
+        </>
+      ),
+    },
+    {
+      checked: cardTerms,
+      toggle: () => setCardTerms(!cardTerms),
+      label: (
+        <>
+          I accept the{" "}
+          <a href="https://www.karmacard.io/card-terms" target="_blank" rel="noopener noreferrer" className="text-karma-purple hover:text-karma-pink underline">
+            Karma Card Terms
+          </a>
+          , and the{" "}
+          <a href="https://www.third-national.com/privacypolicy" target="_blank" rel="noopener noreferrer" className="text-karma-purple hover:text-karma-pink underline">
+            Issuer Privacy Policy
+          </a>
+        </>
+      ),
+    },
+    {
+      checked: certify,
+      toggle: () => setCertify(!certify),
+      label: "I certify that the information I have provided is accurate and that I will abide by all the rules and requirements related to my Karma Spend Card.",
+    },
+    {
+      checked: noSolicitation,
+      toggle: () => setNoSolicitation(!noSolicitation),
+      label: "I acknowledge that applying for the Karma Spend Card does not constitute unauthorized solicitation.",
+    },
+  ];
+
+  return (
+    <div className="space-y-5">
+      <p className="text-sm text-black/45">Please review and accept the following to continue.</p>
+
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-black/25 mb-3">Agreements</p>
+        <div className="space-y-2.5">
+          {agreements.map((item, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={item.toggle}
+              className={`w-full flex items-start gap-4 rounded-2xl border p-4 text-left transition-all duration-200 cursor-pointer ${
+                item.checked
+                  ? "border-karma-purple/40 bg-karma-purple/[0.04] shadow-[0_0_12px_rgba(133,46,239,0.08)]"
+                  : "border-black/[0.06] bg-white hover:border-black/[0.12]"
+              }`}
+            >
+              <div
+                className={`mt-px w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-all duration-200 ${
+                  item.checked
+                    ? "bg-karma-purple shadow-[0_2px_8px_rgba(133,46,239,0.3)]"
+                    : "border-2 border-black/20"
+                }`}
+              >
+                {item.checked && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
+              </div>
+              <span className="text-[15px] text-black/70 leading-snug">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+      <Button onClick={submit} loading={loading} disabled={!allChecked}>
+        Continue
+      </Button>
+      {!allChecked && (
+        <p className="text-xs text-black/25">Check all four agreements above to continue.</p>
+      )}
+    </div>
+  );
+}
+
 /* ─── Create Card Step ─── */
 
 function CreateCardStep({
@@ -517,19 +690,38 @@ export default function DashboardPage() {
   const [card, setCard] = useState<CardInfo | null>(null);
   const [agentKey, setAgentKey] = useState("");
 
-  // Accept owner key from URL hash (e.g. /dashboard#sk_live_...) — skip to KYC
+  // Accept owner key from URL hash (e.g. /dashboard#sk_live_...) — detect correct step
   useEffect(() => {
     const hash = window.location.hash.slice(1);
     if (hash && hash.startsWith("sk_live_")) {
       setOwnerKey(hash);
-      setStep("kyc");
       history.replaceState(null, "", window.location.pathname);
+
+      // Check KYC + terms status to land on the right step
+      (async () => {
+        try {
+          const kyc = await api<{ status: string }>("/api/kyc/status", { key: hash });
+          if (kyc.status === "approved") {
+            const terms = await api<{ accepted: boolean }>("/api/terms/status", { key: hash });
+            if (terms.accepted) {
+              setStep("create-card");
+            } else {
+              setStep("agreements");
+            }
+          } else {
+            setStep("kyc");
+          }
+        } catch {
+          setStep("kyc");
+        }
+      })();
     }
   }, []);
 
   const stepTitles: Record<Step, string> = {
     register: "Create your account",
     kyc: "Identity verification",
+    agreements: "Terms & Agreements",
     "create-card": "Create a card for your agent",
     dashboard: "Dashboard",
   };
@@ -585,7 +777,14 @@ export default function DashboardPage() {
                 )}
 
                 {step === "kyc" && (
-                  <KycStep ownerKey={ownerKey} onComplete={() => setStep("create-card")} />
+                  <KycStep ownerKey={ownerKey} onComplete={() => setStep("agreements")} />
+                )}
+
+                {step === "agreements" && (
+                  <AgreementsStep
+                    ownerKey={ownerKey}
+                    onComplete={() => setStep("create-card")}
+                  />
                 )}
 
                 {step === "create-card" && (

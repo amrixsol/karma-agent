@@ -42,6 +42,7 @@ interface AgentState {
   owner_key?: string;
   kyc_status?: string;
   kyc_url?: string;
+  tos_accepted?: boolean;
   card_id?: string;
   agent_key?: string;
   deposit_address?: string;
@@ -259,7 +260,62 @@ async function pollKycStatus(state: AgentState): Promise<AgentState> {
   }
 }
 
-// ─── Step 3: Create Card ────────────────────────────────────────────────────
+// ─── Step 3: Terms & Agreements ──────────────────────────────────────────────
+
+async function stepTerms(state: AgentState): Promise<AgentState> {
+  if (state.tos_accepted) {
+    log("Terms already accepted.");
+    return state;
+  }
+
+  header("Step 3: Terms & Agreements");
+
+  // Check current status from server
+  try {
+    const res = await api<{ accepted: boolean }>("/api/terms/status", {
+      apiKey: state.owner_key,
+    });
+    if (res.accepted) {
+      state.tos_accepted = true;
+      saveState(state);
+      log("Terms already accepted!");
+      return state;
+    }
+  } catch {
+    // Not yet accepted — continue
+  }
+
+  // Open dashboard for user to accept terms
+  const dashUrl = `${BASE_URL}/dashboard#${state.owner_key}`;
+
+  log("\nYou need to accept Rain's terms & agreements before creating a card.");
+  log("Opening the dashboard in your browser...\n");
+  log(`  ${BASE_URL}/dashboard\n`);
+  openUrl(dashUrl);
+  log("Accept all 4 agreements in the browser, then this terminal will continue.\n");
+
+  // Poll until accepted
+  log("Waiting for terms acceptance...");
+  while (true) {
+    try {
+      const res = await api<{ accepted: boolean }>("/api/terms/status", {
+        apiKey: state.owner_key,
+      });
+      if (res.accepted) {
+        state.tos_accepted = true;
+        saveState(state);
+        log("\n\nTerms accepted!");
+        return state;
+      }
+      process.stdout.write(".");
+    } catch {
+      process.stdout.write("x");
+    }
+    await sleep(5000);
+  }
+}
+
+// ─── Step 4: Create Card ────────────────────────────────────────────────────
 
 async function stepCreateCard(state: AgentState): Promise<AgentState> {
   if (state.agent_key) {
@@ -270,7 +326,7 @@ async function stepCreateCard(state: AgentState): Promise<AgentState> {
     return state;
   }
 
-  header("Step 3: Create Virtual Card");
+  header("Step 4: Create Virtual Card");
 
   // Check for existing cards first
   log("Checking for existing cards...");
@@ -330,7 +386,7 @@ async function stepCreateCard(state: AgentState): Promise<AgentState> {
   const monthly = await ask("Monthly limit in USD (default 2000): ");
 
   log("\nCreating card...");
-  const res = await api<{
+  let res: {
     card_id: string;
     last4: string;
     status: string;
@@ -339,16 +395,27 @@ async function stepCreateCard(state: AgentState): Promise<AgentState> {
     name: string;
     limits: { per_txn: number; daily: number; monthly: number };
     message: string;
-  }>("/api/cards", {
-    method: "POST",
-    apiKey: state.owner_key,
-    body: {
-      name,
-      per_txn_limit: Number(perTxn) || 100,
-      daily_limit: Number(daily) || 500,
-      monthly_limit: Number(monthly) || 2000,
-    },
-  });
+  };
+  try {
+    res = await api("/api/cards", {
+      method: "POST",
+      apiKey: state.owner_key,
+      body: {
+        name,
+        per_txn_limit: Number(perTxn) || 100,
+        daily_limit: Number(daily) || 500,
+        monthly_limit: Number(monthly) || 2000,
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("terms of service")) {
+      log(`\nError: ${msg}`);
+      log(`Please open the dashboard to accept terms: ${BASE_URL}/dashboard#${state.owner_key}`);
+      throw err;
+    }
+    throw err;
+  }
 
   state.card_id = res.card_id;
   state.agent_key = res.agent_api_key;
@@ -370,10 +437,10 @@ async function stepCreateCard(state: AgentState): Promise<AgentState> {
   return state;
 }
 
-// ─── Step 4: Wait for Funding ───────────────────────────────────────────────
+// ─── Step 5: Wait for Funding ───────────────────────────────────────────────
 
 async function stepWaitForFunding(state: AgentState): Promise<AgentState> {
-  header("Step 4: Fund Your Card");
+  header("Step 5: Fund Your Card");
 
   log(`Send USDC (Solana) to this deposit address:\n`);
   log(`  ${state.deposit_address}\n`);
@@ -408,7 +475,7 @@ async function stepWaitForFunding(state: AgentState): Promise<AgentState> {
   }
 }
 
-// ─── Step 5: Operational Mode ───────────────────────────────────────────────
+// ─── Step 6: Operational Mode ───────────────────────────────────────────────
 
 async function operationalMode(state: AgentState): Promise<void> {
   header("Karma Agent — Operational");
@@ -559,6 +626,7 @@ async function main() {
     // Setup flow — each step checks if already completed
     state = await stepRegister(state);
     state = await stepKyc(state);
+    state = await stepTerms(state);
     state = await stepCreateCard(state);
     await stepWaitForFunding(state);
 
