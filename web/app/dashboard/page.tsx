@@ -345,6 +345,7 @@ function KycStep({ ownerKey, onComplete }: { ownerKey: string; onComplete: () =>
     { code: "SE", name: "Sweden" },
     { code: "TH", name: "Thailand" },
     { code: "TT", name: "Trinidad and Tobago" },
+    { code: "TN", name: "Tunisia" },
     { code: "TC", name: "Turks and Caicos Islands" },
     { code: "UG", name: "Uganda" },
     { code: "UY", name: "Uruguay" },
